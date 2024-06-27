@@ -1,0 +1,52 @@
+﻿@model System.Tuple<CarWorkshop.Models.WeeklySchedule, DateTime>
+
+<h2>Employee Work Schedule</h2>
+<a asp-action="Index" asp-controller="Employee">Back to workshop</a>
+<form asp-controller="EmployeeSchedule" asp-action="Index" method="get">
+    <label for="selectedDate">Select Date:</label>
+    <input type="date" id="selectedDate" name="selectedDate" value="@(Model.Item2.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))">
+    <input type="submit" value="Submit">
+</form>
+<div>Displaying week for selected date - @Model.Item2.ToString("yyyy-MM-dd") is @Model.Item2.DayOfWeek</div>
+<table class="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Sunday</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            @for (int hour = 9; hour <= 17; hour++)
+            {
+                <tr>
+                    <td>@hour:00</td>
+                    @for (int day = 0; day < 7; day++)
+                {
+                    var currentDay = Model.Item1.GetDayByIndex(day);
+                    var currentTimeSlot = currentDay?.FirstOrDefault(ts => ts.BeginTime.Hour == hour);
+                    if(currentTimeSlot == null)
+                    {
+                        <td>
+                            <button type="button" class="btn btn-secondary" disabled>N\A</button>
+                            
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            <button type="button" class="btn btn-secondary" disabled style="background-color: blue;">Ticket: @currentTimeSlot.TicketID</button>
+                        </td>
+                    }
+                }
+                </tr>
+                }
+                </tbody>
+                </table>

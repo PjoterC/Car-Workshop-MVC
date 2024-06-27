@@ -1,0 +1,17 @@
+﻿
+
+<h2>Manage your work</h2>
+
+<div>
+    <p>Welcome @User.Identity.Name</p>
+</div>
+
+<div>
+    <ul>
+        <li><a asp-controller="Employee" asp-action="AllTickets">All tickets</a></li>
+        <li><a asp-controller="Employee" asp-action="EmployeeTickets">My tickets</a></li>
+        <li><a asp-controller="EmployeeSchedule" asp-action="Index">My schedule</a></li>
+        <li><a asp-controller="EmployeeScheduleEdit" asp-action="Index">Edit availability</a></li>
+        
+    </ul>
+</div>

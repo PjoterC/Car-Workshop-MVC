@@ -1,0 +1,132 @@
+﻿@model CarWorkshop.Models.TicketSchedule
+
+@{
+    ViewData["Title"] = "Ticket Schedule";
+}
+
+<h1>Ticket Schedule (ID: @Model.ticketID)</h1>
+<a asp-action="Edit" asp-controller="Tickets" asp-route-id="@Model.ticketID">Back to ticket edit</a>
+<form asp-controller="TicketSchedule" asp-action="Index" method="get">
+    <label for="selectedDate">Select Date:</label>
+    <input type="hidden" name="ticketID" value="@Model.ticketID">
+    <input type="date" id="selectedDate" name="selectedDate" value="@(Model.Date.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))">
+    <input type="submit" value="Submit">
+</form>
+<div>Displaying week for selected date - @Model.Date.ToString("yyyy-MM-dd") is @Model.Date.DayOfWeek</div>
+
+@if (Model.WeeklySchedule != null)
+{
+    DateTime sunday = Model.Date.AddDays(-(((int)Model.Date.DayOfWeek + 7) % 7));
+    DateTime saturday = sunday.AddDays(6);
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Sunday</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            @for (int hour = 9; hour <= 17; hour++)
+            {
+                <tr>
+                    <td>@hour:00</td>
+                    @for (int day = 0; day < 7; day++)
+                    {
+                        <td>
+                            @{
+                                bool isSelectable = false;
+                                bool isInSchedule = false;
+                                bool isDeletable = false;
+                                TimeSlot taken = new TimeSlot();
+                                var currentDay = Model.WeeklySchedule.GetDayByIndex(day);
+                                var currentTimeSlot = currentDay?.FirstOrDefault(ts => ts.BeginTime.Hour == hour);
+                                if(currentDay != null)
+                                {
+                                    currentTimeSlot = currentDay?.FirstOrDefault(ts => ts.BeginTime.Hour == hour);
+                                    if (currentTimeSlot != null)
+                                    {
+                                        isInSchedule = true;
+                                        isSelectable = false;
+                                        isDeletable = true;
+                                    }
+                                    else
+                                    {
+
+                                        bool checkSchedule = Model.employeeScheduleSlots.Any(ts => (ts.BeginTime.Hour == hour && ts.BeginTime.DayOfWeek == (DayOfWeek)Enum.ToObject(typeof(DayOfWeek), day)));
+                                        if (!checkSchedule)
+                                        {
+                                            isInSchedule = false;
+                                            isSelectable = false;
+                                            isDeletable = false;
+                                        }
+                                        else
+                                        {
+                                            taken = Model.takenTimeSlots.FirstOrDefault(ts => (ts.BeginTime.Hour == hour && ts.TicketID != 0 && ts.BeginTime.DayOfWeek == (DayOfWeek)Enum.ToObject(typeof(DayOfWeek), day) && (ts.BeginTime.Date >= sunday.Date && ts.BeginTime.Date <= saturday.Date)));
+                                            bool isTaken = Model.takenTimeSlots.Any(ts => (ts.BeginTime.Hour == hour && ts.TicketID != 0 && ts.BeginTime.DayOfWeek == (DayOfWeek)Enum.ToObject(typeof(DayOfWeek), day) && (ts.BeginTime.Date >= sunday.Date && ts.BeginTime.Date <= saturday.Date)));
+                                            isInSchedule = true;
+                                            isDeletable = false;
+                                            if (!isTaken)
+                                            {
+                                                isSelectable = true;
+                                            }
+                                            else
+                                            {
+                                               
+                                                isSelectable = false;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                
+
+
+                            }
+
+                            @if(!isInSchedule)
+                            {
+                                <button type="button" class="btn btn-secondary" disabled>N\A</button>
+                            }
+                            else if(isInSchedule && !isSelectable && !isDeletable)
+                            {
+                                <button type="button" class="btn btn-secondary" disabled>Ticket: @taken?.TicketID</button>
+                            } 
+                           
+                            else if (isInSchedule && isSelectable && !isDeletable)
+                            {
+                                Console.WriteLine("Add slot at " + hour + " " + day + " ");
+                                <form asp-controller="TicketSchedule" asp-action="AddSlot" method="post">
+                                    <input type="hidden" name="ticketID" value="@Model.ticketID">
+                                    <input type="hidden" name="day" value="@day">
+                                    <input type="hidden" name="time" value="@hour:00">
+                                    <input type="hidden" name="selectedDate" value="@Model.Date.ToString("yyyy-MM-dd")">
+                                    <button type="submit" class="btn btn-success">+</button>
+                                </form>
+                            }
+                            else if(isInSchedule && !isSelectable && isDeletable)
+                            {
+                                
+                                <form asp-controller="TicketSchedule" asp-action="DeleteSlot" method="post">
+                                    <input type="hidden" name="id" value="@currentTimeSlot.Id" />
+                                    <button type="submit" class="btn btn-danger">-</button>
+                                </form>
+                            } 
+                            else
+                            {
+                                <button type="button" class="btn btn-secondary" disabled>@isSelectable @isInSchedule @isDeletable @day @hour</button>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}

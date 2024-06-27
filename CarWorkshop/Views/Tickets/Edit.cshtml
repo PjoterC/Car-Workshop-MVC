@@ -1,0 +1,130 @@
+﻿@model CarWorkshop.ViewModels.EditViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Ticket (ID: @Model.Ticket.Id)</h4>
+<hr />
+<a asp-action="EmployeeTickets" asp-controller="Tickets">Back to my tickets</a>
+
+<div>
+    <a asp-action="Index" asp-controller="TicketSchedule" asp-route-ticketID="@Model.Ticket.Id">Edit schedule</a>
+</div>
+@if(Model.Ticket.State == "Done")
+{
+    <div>
+        <a asp-action="Close" asp-controller="Tickets" asp-route-id="@Model.Ticket.Id">Close ticket</a>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Ticket.Id" />
+            <div class="form-group">
+                <label asp-for="Ticket.Brand" class="control-label"></label>
+                <input asp-for="Ticket.Brand" class="form-control" />
+                <span asp-validation-for="Ticket.Brand" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ticket.Model" class="control-label"></label>
+                <input asp-for="Ticket.Model" class="form-control" />
+                <span asp-validation-for="Ticket.Model" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ticket.RegistrationID" class="control-label"></label>
+                <input asp-for="Ticket.RegistrationID" class="form-control" />
+                <span asp-validation-for="Ticket.RegistrationID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ticket.Description" class="control-label"></label>
+                <input asp-for="Ticket.Description" class="form-control" />
+                <span asp-validation-for="Ticket.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ticket.EstimateDescription" class="control-label"></label>
+                <input asp-for="Ticket.EstimateDescription" class="form-control" />
+                <span asp-validation-for="Ticket.EstimateDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ticket.EstimateCost" class="control-label"></label>
+                <input asp-for="Ticket.EstimateCost" class="form-control" />
+                <span asp-validation-for="Ticket.EstimateCost" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Ticket.EstimateAcceptedByClient" /> @Html.DisplayNameFor(model => model.Ticket.EstimateAcceptedByClient)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ticket.PaidByClient" class="control-label"></label>
+                <input asp-for="Ticket.PaidByClient" class="form-control" />
+                <span asp-validation-for="Ticket.PaidByClient" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>    
+        </form>
+        
+        <table class="table">
+            <thead>
+                <h2>List of parts</h2>
+                <a asp-action="Create" asp-controller="BoughtParts" asp-route-ticketID="@Model.Ticket.Id">Add new part</a>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Parts[0].TicketId)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Parts[0].Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Parts[0].Amount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Parts[0].Price)
+                    </th>
+                    <th>
+                        Total Price ($)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Parts)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TicketId)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Amount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Price)
+                        </td>
+                            
+                            <td>
+                                @(item.Price * item.Amount)
+                            </td>
+                        
+                        <td>
+                            <a asp-action="DeletePart" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,74 @@
+﻿@model CarWorkshop.Models.WeeklySchedule
+
+<h2>Edit Week Availability</h2>
+<a asp-action="Index" asp-controller="Employee">Back to workshop</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Sunday</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @for (int hour = 9; hour <= 17; hour++)
+        {
+            <tr>
+                <td>@hour:00</td>
+                @foreach (var day in new List<string> { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" })
+                {
+                    var timeSlots = Model.GetType().GetProperty(day)?.GetValue(Model) as List<CarWorkshop.Models.TimeSlot>;
+                    var timeSlot = timeSlots?.FirstOrDefault(ts => ts.BeginTime.Hour == hour);
+                    <td>
+                        @if (timeSlot != null)
+                        {
+                            <form asp-controller="EmployeeScheduleEdit" asp-action="DeleteSlot" method="post">
+                                <input type="hidden" name="id" value="@timeSlot.Id" />
+                                <button type="submit" class="btn btn-danger">Remove</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-controller="EmployeeScheduleEdit" asp-action="AddSlot" method="post">
+                                <input type="hidden" name="day" value="@GetDayIndex(day)" />
+                                <input type="hidden" name="time" value="@hour:00" />
+                                <button type="submit" class="btn btn-success">Add</button>
+                            </form>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+@functions {
+    public int GetDayIndex(string day)
+    {
+        switch (day)
+        {
+            case "Monday":
+                return 1;
+            case "Tuesday":
+                return 2;
+            case "Wednesday":
+                return 3;
+            case "Thursday":
+                return 4;
+            case "Friday":
+                return 5;
+            case "Saturday":
+                return 6;
+            case "Sunday":
+                return 0;
+            default:
+                return -1; // Return -1 for invalid input
+        }
+    }
+}

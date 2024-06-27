@@ -1,0 +1,199 @@
+﻿@model CarWorkshop.ViewModels.DetailsViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+@if (Model.TicketData.State != "Closed")
+{
+<div>
+    <h4>Ticket timetable</h4>
+    <a asp-action="EmployeeTickets" asp-controller="Tickets">Back to ticket list</a>
+    @if (Model.TicketData.State != "Closed")
+    {
+        <a asp-action="Edit" asp-route-id="@Model.TicketData.Id">Edit the ticket</a>
+    }
+    <form asp-controller="Tickets" asp-action="Details" method="get">
+        <label for="selectedDate">Select Date:</label>
+        <input type="hidden" name="id" value="@Model.TicketData.Id">
+        <input type="date" id="selectedDate" name="selectedDate" value="@(Model.Date.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))">
+        <input type="submit" value="Submit">
+    </form>
+    <div>Displaying week for selected date - @Model.Date.ToString("yyyy-MM-dd") is @Model.Date.DayOfWeek</div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Sunday</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+
+        </tr>
+    </thead>
+
+    <tbody>
+            
+            @for (int hour = 9; hour <= 17; hour++)
+            {
+                <tr>
+                    <td>@hour:00</td>
+                    @for (int day = 0; day < 7; day++)
+                    {
+                        <td>
+                        @{
+                            var currentDay = Model.TicketTimeTable.GetDayByIndex(day);
+                            var currentTimeSlot = currentDay?.FirstOrDefault(ts => ts.BeginTime.Hour == hour);
+                            bool isTaken = false;
+                            if (currentDay != null)
+                            {
+                                currentTimeSlot = currentDay?.FirstOrDefault(ts => ts.BeginTime.Hour == hour);
+                                if (currentTimeSlot != null)
+                                {
+                                    isTaken = true;
+                                }
+                                else
+                                {
+                                    isTaken = false;
+                                }
+                            }
+
+                        }
+
+                        @if (isTaken)
+                        {
+                            <button type="button" class="btn btn-secondary" disabled style="background-color: blue;">Used</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-secondary" disabled>Not used</button>
+                        }
+                    </td>
+
+                    }
+                </tr>
+            }
+    </tbody>
+</table>
+
+}
+
+
+
+
+<div>
+    <h4>Ticket information</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.Brand)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.Brand)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.Model)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.Model)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.RegistrationID)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.RegistrationID)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.Description)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.Description)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.EmployeeID)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.EmployeeID)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.EstimateDescription)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.EstimateDescription)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.EstimateCost)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.EstimateCost)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.EstimateAcceptedByClient)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.EstimateAcceptedByClient)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.PaidByClient)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.PaidByClient)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketData.State)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TicketData.State)
+        </dd>
+    </dl>
+</div>
+
+<table class="table">
+    <thead>
+        <h2>List of parts</h2>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PartsData[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PartsData[0].Amount)
+            </th>
+            <th>
+                Price($)
+            </th>
+            <th>
+                Total Price($)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.PartsData)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+
+                <td>
+                    @(item.Price * item.Amount)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
